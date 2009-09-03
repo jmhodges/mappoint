@@ -10,10 +10,10 @@ module MapPoint
 
     self.token_ttl = 240 # 4 hours in minutes
 
-    def get_client_token(ip_address)
+    def get_client_token(ip_address, token_ttl=self.class.token_ttl)
       response = mp_invoke('GetClientToken') do |msg|
         msg.add 'map:ClientIPAddress', ip_address
-        msg.add 'map:TokenValidityDurationMinutes', self.class.token_ttl
+        msg.add 'map:TokenValidityDurationMinutes', token_ttl
       end
       parse_token(response.document)
     end
