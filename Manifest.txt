@@ -1,0 +1,7 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/mappoint
+lib/mappoint.rb
+test/test_mappoint.rb
