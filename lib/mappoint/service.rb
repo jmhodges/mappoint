@@ -33,6 +33,9 @@ module MapPoint
       begin
         mp_invoke_raw(operation_name, &blk)
       rescue Handsoap::Service::HttpError => e
+        # FIXME gross conditional. HttpError should have a ClientError
+        # subclass for all 4xx status codes, etc.
+        raise e if e.response.status >= 500
         set_digest_header(e.response)
         mp_invoke_raw(operation_name, &blk)
       end
