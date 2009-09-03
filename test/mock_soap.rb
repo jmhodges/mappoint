@@ -25,7 +25,7 @@ class MockSoap
   def initialize(opts)
     self.possible_responses = {}
     self.extra_namespaces = opts[:extra_namespaces]
-    Handsoap::Http.drivers[:mock_soap] = HttpMock.new(self)
+    Handsoap::Http.drivers[:mock_soap] = CachedFileMockHttp.new(self)
     Handsoap.http_driver = :mock_soap
   end
   
@@ -120,7 +120,7 @@ class MockSoap
     end
   end
   
-  class HttpMock
+  class CachedFileMockHttp
     def initialize(mock_soap)
       @mock = mock_soap
     end
