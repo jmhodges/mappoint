@@ -1,26 +1,30 @@
 = mappoint
 
-* FIX (url)
+* http://github.com/jmhodges/mappoint
 
 == DESCRIPTION:
 
-FIX (describe your package)
+Talk to MapPoint's SOAP API.
 
 == FEATURES/PROBLEMS:
 
-* FIX (list of features or problems)
+* oh just grep for the FIXMEs right now
 
 == SYNOPSIS:
 
-  FIX (code sample of usage)
+  MapPoint::Common.username = 'yourusername'
+  MapPoint::Common.password = 'yourpassword'
 
 == REQUIREMENTS:
 
-* FIX (list of requirements)
+* mappoint
 
 == INSTALL:
 
-* FIX (sudo gem install, anything else)
+Either:
+
+* rip install git://github.com/jmhodges/mappoint.git
+* sudo gem install mappoint
 
 == LICENSE:
 

@@ -2,6 +2,12 @@ History.txt
 Manifest.txt
 README.txt
 Rakefile
-bin/mappoint
+deps.rip
 lib/mappoint.rb
+lib/mappoint/common.rb
+lib/mappoint/digest_auth.rb
+lib/mappoint/service.rb
 test/test_mappoint.rb
+test/data/8abd53c57b3fa14732e37af5ea7e61ff
+test/data/cee3ae628d5abcaeca8eb43346619c07
+test/mock_soap.rb
