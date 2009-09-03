@@ -30,7 +30,7 @@ module MapPoint
     def mp_invoke(operation_name, &blk)
       begin
         mp_invoke_raw(operation_name, &blk)
-      rescue Handsoap::Service::HttpError => e
+      rescue Handsoap::HttpError => e
         # FIXME gross conditional. HttpError should have a ClientError
         # subclass for all 4xx status codes, etc.
         raise e if e.response.status >= 500
