@@ -72,7 +72,6 @@ class MockSoap
   
   class MockResponse
 
-
     def initialize(soap_operation, sibling_responses)
       @soap_operation = soap_operation
       @sibling_responses = sibling_responses
