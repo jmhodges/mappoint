@@ -6,9 +6,7 @@ module MapPoint
     end
 
     def self.parsed_uri
-      unless @parsed_uri
-        @parsed_uri = URI.parse(uri)
-      end
+      @parsed_uri ||= URI.parse(uri)
       @parsed_uri
     end
 
