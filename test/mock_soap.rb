@@ -6,6 +6,7 @@ class MockSoap
     attr_accessor :cache_mode
   end
 
+  # Can be :read_only or :store_new
   self.cache_mode = :read_only
   
   def self.cache_dir
