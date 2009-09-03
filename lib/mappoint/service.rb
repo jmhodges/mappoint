@@ -33,7 +33,6 @@ module MapPoint
       begin
         mp_invoke_raw(operation_name, &blk)
       rescue => e # Handsoap::Service::HttpError => e
-        p e
         set_digest_header(e.response)
         mp_invoke_raw(operation_name, &blk)
       end
