@@ -3,7 +3,7 @@ class MockSoap
   attr_accessor :possible_responses, :extra_namespaces
 
   class << self
-    attr_accessor :cache_dir, :cache_mode
+    attr_accessor :cache_mode
   end
 
   self.cache_mode = :read_only
