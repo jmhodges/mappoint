@@ -10,7 +10,7 @@ class MockSoap
   self.cache_mode = :read_only
   
   def self.cache_dir
-    raise "No cache_dir set for MockSoap" unless @cache_dir
+    raise "MockSoap.cache_dir has not been set." unless @cache_dir
     @cache_dir
   end
   
