@@ -4,7 +4,7 @@
 
 == DESCRIPTION:
 
-Talk to MapPoint's SOAP API.
+Talk to MapPoint SOAP API.
 
 == FEATURES/PROBLEMS:
 
