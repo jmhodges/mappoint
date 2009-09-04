@@ -3,10 +3,8 @@ require 'mappoint'
 require 'mock_soap'
 
 if ENV['cache_mode'] == 'store_new'
-  MapPoint::Common.username = ENV['username']
-  MapPoint::Common.password = ENV['password']
-  MapPoint::Render.username = ENV['username']
-  MapPoint::Render.password = ENV['password']
+  MapPoint.username = ENV['username']
+  MapPoint.password = ENV['password']
 
   MockSoap.cache_mode = :store_new
 end

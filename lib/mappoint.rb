@@ -11,4 +11,7 @@ require 'mappoint/render'
 
 module MapPoint
   VERSION = '1.0.0'
+  class << self
+    attr_accessor :username, :password
+  end
 end

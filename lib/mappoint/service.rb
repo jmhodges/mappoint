@@ -2,12 +2,20 @@ module MapPoint
   class Service < Handsoap::Service
     MAPPOINT_URL = 'http://s.mappoint.net/mappoint-30/'
     class << self 
-      attr_accessor :username, :password, :cached_digest_header
+      attr_accessor :cached_digest_header
     end
 
     def self.parsed_uri
       @parsed_uri ||= URI.parse(uri)
       @parsed_uri
+    end
+
+    def username
+      ::MapPoint.username
+    end
+
+    def password
+      ::MapPoint.password
     end
 
     def on_create_document(doc)

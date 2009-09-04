@@ -12,8 +12,8 @@ Talk to MapPoint's SOAP API.
 
 == SYNOPSIS:
 
-  MapPoint::Common.username = 'yourusername'
-  MapPoint::Common.password = 'yourpassword'
+  MapPoint.username = 'yourusername'
+  MapPoint.password = 'yourpassword'
 
   MapPoint::Common.new.get_client_token('127.0.0.1')
 
