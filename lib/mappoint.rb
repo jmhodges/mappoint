@@ -10,7 +10,7 @@ require 'mappoint/common'
 require 'mappoint/render'
 
 module MapPoint
-  VERSION = '1.0.0'
+  VERSION = '0.1.0'
   class << self
     attr_accessor :username, :password
   end
