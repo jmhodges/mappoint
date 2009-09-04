@@ -15,9 +15,15 @@ Talk to MapPoint's SOAP API.
   MapPoint::Common.username = 'yourusername'
   MapPoint::Common.password = 'yourpassword'
 
+  MapPoint::Common.new.get_client_token('127.0.0.1')
+
 == REQUIREMENTS:
 
-* mappoint
+* handsoap, specifically the version with HttpError which you can find
+  either at
+  http://github.com/jmhodges/handsoap/tree/temporary_for_awesome
+  (which also lets you use handsoap outside of a gem) or
+  http://github.com/jmhodges/handsoap/tree/improved_error_handling
 
 == INSTALL:
 
