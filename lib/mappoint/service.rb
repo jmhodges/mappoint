@@ -27,12 +27,12 @@ module MapPoint
     end
 
     private
+     # FIXME gross conditional. HttpError should have a ClientError
+    # subclass for all 4xx status codes, etc.
     def mp_invoke(operation_name, &blk)
       begin
         mp_invoke_raw(operation_name, &blk)
       rescue Handsoap::HttpError => e
-        # FIXME gross conditional. HttpError should have a ClientError
-        # subclass for all 4xx status codes, etc.
         raise e if e.response.status >= 500
         set_digest_header(e.response)
         mp_invoke_raw(operation_name, &blk)
@@ -41,9 +41,7 @@ module MapPoint
 
     def mp_invoke_raw(operation_name, &blk)
       operation_url = MAPPOINT_URL + operation_name
-      invoke('map:'+operation_name, :soap_action => operation_url) do |msg|
-        msg.add('map:specification', &blk)
-      end
+      invoke('map:'+operation_name, :soap_action => operation_url, &blk)
     end
     
     def ns

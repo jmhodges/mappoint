@@ -38,27 +38,21 @@ class MockSoap
   def read(request)
     doc = parse_xml(request.body)
 
-    desired_operation = get_soap_operation(request.body)
+    desired_operation = parse_soap_operation(request.body)
 
     patterns_to_responses = possible_responses[desired_operation]
+
     matching_responses = patterns_to_responses.select do |k, response|
       response if k.all? do |patt, expectation|
         doc.xpath(patt, namespaces).to_raw == expectation
       end
     end
-
-    if matching_responses && matching_responses.size > 0
-      if matching_responses.size > 1
-        raise "Too many responses match this request"
-      end
-    else
-      raise "None of the mocked out responses matched"
-    end
     
+    check_number_of_responses_found(matching_responses)
     matching_responses[0][1].read(request)
   end
 
-  def get_soap_operation(body)
+  def parse_soap_operation(body)
     parse_xml(body).xpath('//env:Body/*', namespaces).first.node_name
   end
 
@@ -69,19 +63,29 @@ class MockSoap
   def namespaces
     {'env' => "http://schemas.xmlsoap.org/soap/envelope/"}.merge(extra_namespaces)
   end
-  
+
+  def check_number_of_responses_found(found_responses)
+    if found_responses.empty?
+      raise "None of the mocked out responses matched"
+    end
+
+    if found_responses.size > 1
+      raise "Too many responses match this request"
+    end
+  end
+
   class MockResponse
 
-    def initialize(soap_operation, sibling_responses)
+    def initialize(soap_operation, patterns_to_responses)
       @soap_operation = soap_operation
-      @sibling_responses = sibling_responses
-      @patterns = nil
+      @patterns_to_responses = patterns_to_responses
+      @patterns = {}
     end
 
     def with_xpath(patterns_to_expecations)
-      old_patterns = @sibling_responses.delete(@patterns) || {}
-      @patterns = old_patterns.merge(patterns_to_expecations)
-      @sibling_responses[@patterns] = self
+      @patterns_to_responses.delete(@patterns)
+      @patterns.merge!(patterns_to_expecations)
+      @patterns_to_responses[@patterns] = self
     end
 
     def read(request)
@@ -97,7 +101,7 @@ class MockSoap
     end
 
     def file_path
-      raise "no patterns set!" if @patterns.nil?
+      raise "no patterns set!" if @patterns.empty?
       arr = [@soap_operation]
       arr += @patterns.keys.sort.map do |k|
         k + @patterns[k]
@@ -125,7 +129,7 @@ class MockSoap
       @mock = mock_soap
     end
     
-    def load!; is_loaded = true; end
+    def load!; true; end
     
     def send_http_request(request)
       @mock.read(request)
@@ -134,7 +138,8 @@ class MockSoap
   
   class MissingCacheFile < StandardError;
     def initialize(msg=nil)
-      msg ||= "The cached file does not exist for this request. Run the tests in store_new mode to grab it."
+      msg ||= "The cached file does not exist for this request."+
+        "Run the tests in store_new mode to grab it."
       super(msg)
     end
   end
