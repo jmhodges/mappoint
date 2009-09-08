@@ -86,12 +86,22 @@ class TestMappoint < Test::Unit::TestCase
     }
     map_options = {:zoom => 2}
 
-    url = MapPoint::Render.get_map(image_format,
+    ret = MapPoint::Render.get_map(image_format,
                                        box,
                                        pushpins,
                                        map_options
                                        )
     expected = "http://cpmwsrender06.cp.prod.mappoint.net/render-30/getmap.aspx?key=EAEBDE77C151541B0F7B"
-    assert_equal expected, url
+
+    assert_equal expected, ret[:url]
+    assert_equal 34.144002889058321, ret[:by_height_width][:centerpoint][:latitude]
+    assert_equal -117.254, ret[:by_height_width][:centerpoint][:longitude]
+
+    br = ret[:by_bounding_rectangle]
+
+    assert_equal 32.139690495379767, br[:southwest][:latitude]
+    assert_equal -119.62124574631847, br[:southwest][:longitude]
+    assert_equal 36.148315282736874, br[:northeast][:latitude]
+    assert_equal -114.88675425368155, br[:northeast][:longitude]
   end
 end

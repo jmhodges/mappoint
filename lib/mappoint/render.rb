@@ -3,7 +3,7 @@ module MapPoint
     endpoint(:uri => 'http://renderv3.mappoint.net/Render-30/RenderService.asmx?WSDL',
              :version => 1)
     def get_best_bounding_rectangle(latitude, longitude)
-      response = mp_invoke('GetBestMapView') do |msg|
+      @response = mp_invoke('GetBestMapView') do |msg|
         msg.add 'map:locations' do |many_locs|
           many_locs.add 'map:Location' do |loc|
             loc.add 'map:LatLong' do |ll|
@@ -15,7 +15,8 @@ module MapPoint
         msg.add 'map:dataSourceName', 'MapPoint.NA'
       end
 
-      parse_bounding_rectangle(response.document)
+      by_br = native_doc.xpath('//xmlns:ByBoundingRectangle', ns).first
+      parse_bounding_rectangle(by_br)
     end
 
     # FIXME This documentation is really crappily formatted and kinda lacking.
@@ -28,13 +29,14 @@ module MapPoint
     # returned data from +get_best_bounding_rectangle+.  Oh, and each
     # pushpin is a hash of options with it's own +:icon_name+, the
     # +:icon_datasource+ to find the icon in, and the +:latitude+ and
-    # +:longitude+ for the pushpins. +:options+ are options for the
+    # +:longitude+ for the pushpins. +:map_options+ are options for the
     # map specifically, including the +:pan_vertical+,
-    # +:pan_horizontal+, +:zoom+ level and the +:image_mimetype+ with
+    # +:pan_horizontal+, +:zoom+ level, +:render_type+ (which defaults
+    # to 'ReturnUrl') and the +:image_mimetype+ with
     # the same available options as above.
     # FIXME a whole host of other options to this param are not implemented.
     def get_map(image_format, bounding_box, pushpins, map_options)
-      response = mp_invoke('GetMap') do |msg|
+      @response = mp_invoke('GetMap') do |msg|
         msg.set_attr 'xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance"
         msg.set_attr 'xmlns:xsd', 'http://www.w3.org/2001/XMLSchema/'
         msg.add 'map:specification' do |spec|
@@ -50,29 +52,72 @@ module MapPoint
           add_push_pins(spec, pushpins)
         end
       end
-      parse_url(response.document)
+      parse_map_result(native_doc)
     end
     
     private
+    def native_doc
+      @response.document.native_element
+    end
+    
     def parse_bounding_rectangle(doc)
-      ele = doc.xpath('//xmlns:BoundingRectangle', ns)[0].native_element
-      parse_corner(ele, 'Southwest').
-        merge(parse_corner(ele, 'Northeast'))
+      ele = doc.xpath('./xmlns:BoundingRectangle', ns)
+      parse_latlong(ele, 'Southwest').
+        merge(parse_latlong(ele, 'Northeast'))
     end
 
-    def parse_corner(element, corner_name)
-      ele = element.at(corner_name, ns)
-      { corner_name.downcase.to_sym =>
+    def parse_latlong(element, tagname)
+      lat = long = nil
+      cp = element.at(tagname, ns)
+      cp.children.each do |c|
+        case c.name
+        when 'Latitude'
+          lat = c.inner_text.to_f
+        when 'Longitude'
+          long = c.inner_text.to_f
+        end
+      end
+      
+      { tagname.downcase.to_sym =>
         { :latitude =>
-          ele.at('Latitude/text()', ns).to_s.to_f,
+            lat,
           :longitude =>
-          ele.at('Longitude/text()', ns).to_s.to_f
+            long
         }
       }
     end
 
+    def parse_map_result(doc)
+      result = doc.xpath('//xmlns:GetMapResult[1]/xmlns:MapImage', ns)
+      view = result.xpath('./xmlns:View', ns).first
+      {
+        :url => parse_url(result),
+        :by_height_width => parse_by_height_width(view),
+        :by_bounding_rectangle => parse_by_bounding_rectangle(view)
+      }
+    end
+    
     def parse_url(doc)
-      xml_to_str(doc.xpath('//xmlns:Url/text()', ns))
+      doc.xpath('./xmlns:Url', ns).inner_text
+    end
+
+    def parse_by_height_width(view)
+      lat = long = nil
+      cp = view.xpath('.//xmlns:ByHeightWidth/xmlns:CenterPoint', ns)
+      cp.first.children.each do |c|
+        case c.name
+        when 'Latitude'
+          lat = c.inner_text.to_f
+        when 'Longitude'
+          long = c.inner_text.to_f
+        end
+      end
+      {:centerpoint => {:latitude => lat, :longitude => long}}
+    end
+
+    def parse_by_bounding_rectangle(view)
+      br = view.xpath('./xmlns:ByBoundingRectangle', ns)
+      parse_bounding_rectangle(br)
     end
 
     def add_bounding_rectangle(doc, bounding_box)
