@@ -95,7 +95,7 @@ class MockSoap
       elsif !File.exists?(file_path)
         raise MissingCacheFile
       else
-        resp = Marshal.load(File.open(file_path) {|f| f.read })
+        resp = read_cached_file
       end
       resp
     end
@@ -121,6 +121,10 @@ class MockSoap
 
     def writable_to_cache?
       MockSoap.path_is_writable?(file_path)
+    end
+
+    def read_cached_file
+      Marshal.load(File.open(file_path) {|f| f.read })
     end
   end
   
