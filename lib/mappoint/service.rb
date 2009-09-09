@@ -35,7 +35,7 @@ module MapPoint
     end
 
     private
-     # FIXME gross conditional. HttpError should have a ClientError
+    # FIXME gross conditional. HttpError should have a ClientError
     # subclass for all 4xx status codes, etc.
     def mp_invoke(operation_name, &blk)
       begin

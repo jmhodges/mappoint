@@ -104,4 +104,66 @@ class TestMappoint < Test::Unit::TestCase
     assert_equal 36.148315282736874, br[:northeast][:latitude]
     assert_equal -114.88675425368155, br[:northeast][:longitude]
   end
+
+  def test_get_map_with_route
+     mock_soap.for('GetMap').
+      with_xpath('//map:Northeast/map:Latitude/text()' => '35.142',
+                 '//map:Northeast/map:Longitude/text()' => '-116.254').
+      with_xpath('//map:Southwest/map:Latitude/text()' => '33.142',
+                 '//map:Southwest/map:Longitude/text()' => '-118.254').
+      with_xpath('//map:Pushpins/map:Pushpin/map:IconDataSource/text()' =>
+                 'Yellowpagesdotcom112881.112881').
+      with_xpath('//map:Options/map:Zoom/text()' => '2')
+
+    image_format = {
+      :image_mimetype => 'image/gif',
+      :height => 100,
+      :width => 100
+    }
+    pushpins = [{
+                  :icon_datasource => "Yellowpagesdotcom112881.112881",
+                  :icon_name => 'yellowpages',
+                  :latitude => 34.142,
+                  :longitude => -118.254
+                },
+                {
+                  :icon_datasource => "Yellowpagesdotcom112881.112881",
+                  :icon_name => 'yellowpages',
+                  :latitude => 34.142,
+                  :longitude => -117.254
+                }]
+    box = {
+      :northeast => {
+        :latitude => 35.142, :longitude => -116.254
+      },
+      :southwest => {
+        :latitude => 33.142, :longitude => -118.254
+      }
+    }
+    map_options = {:zoom => 2}
+
+    ret = MapPoint::Render.get_map(image_format,
+                                       box,
+                                       pushpins,
+                                       map_options
+                                   )
+    flunk
+  end
+
+  def test_okay_with_calculate_simple_route
+    Handsoap::Service.logger = STDERR
+    mock_soap.for('CalculateSimpleRoute').
+      with_xpath('//map:latLongs/map:LatLong[1]/map:Latitude/text()' => '34.113033',
+                 '//map:latLongs/map:LatLong[1]/map:Longitude/text()' => '-118.268506').
+      with_xpath('//map:latLongs/map:LatLong[2]/map:Latitude/text()' => '34.11861',
+                 '//map:latLongs/map:LatLong[2]/map:Longitude/text()' => '-118.29944')
+
+    start = {:latitude => 34.113033,:longitude => -118.268506}
+    finish = {:latitude => 34.11861, :longitude => -118.29944}
+    points = [start, finish]
+    parsed_xml = MapPoint::Route.calculate_simple_route_xml(points).native_element
+
+    first_instruction = parsed_xml.xpath('//xmlns:Itinerary/xmlns:Segments/xmlns:Segment[1]/xmlns:Directions/xmlns:Direction[1]/xmlns:Instruction', {'xmlns' => "http://s.mappoint.net/mappoint-30/"})
+    assert_equal 'Depart Start on Riverside Dr (North-West)', first_instruction.inner_text
+  end
 end

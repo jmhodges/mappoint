@@ -34,8 +34,8 @@ module MapPoint
     # +:pan_horizontal+, +:zoom+ level, +:render_type+ (which defaults
     # to 'ReturnUrl') and the +:image_mimetype+ with
     # the same available options as above.
-    # FIXME a whole host of other options to this param are not implemented.
-    def get_map(image_format, bounding_box, pushpins, map_options)
+    # FIXME a whole host of other options to this endpoint are not implemented.
+    def get_map(image_format, bounding_box, pushpins, map_options, parsed_route=nil)
       @response = mp_invoke('GetMap') do |msg|
         msg.set_attr 'xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance"
         msg.set_attr 'xmlns:xsd', 'http://www.w3.org/2001/XMLSchema/'
@@ -50,11 +50,14 @@ module MapPoint
 
           add_map_options(spec, map_options, image_format)
           add_push_pins(spec, pushpins)
+          if parsed_route
+            spec.add 'map:Route', parsed_route, :raw
+          end
         end
       end
       parse_map_result(native_doc)
     end
-    
+
     private
     def native_doc
       @response.document.native_element

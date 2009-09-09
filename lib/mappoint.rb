@@ -8,6 +8,7 @@ require 'mappoint/service'
 
 require 'mappoint/common'
 require 'mappoint/render'
+require 'mappoint/route'
 
 module MapPoint
   VERSION = '0.1.0'
