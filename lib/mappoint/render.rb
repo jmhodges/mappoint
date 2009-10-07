@@ -130,7 +130,8 @@ module MapPoint
     end
 
     def parse_itinerary(xml)
-      return unless x = xml.xpath('//xmlns:Itinerary',ns)[0].native_element
+      return unless x = xml.xpath('//xmlns:Itinerary',ns)
+      x = x[0].native_element
       {
         :total_driving_time => parse_driving_time(x),
         :total_distance => parse_distance(x),
