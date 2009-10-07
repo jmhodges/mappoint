@@ -142,7 +142,7 @@ class MockSoap
   
   class MissingCacheFile < StandardError;
     def initialize(msg=nil)
-      msg ||= "The cached file does not exist for this request."+
+      msg ||= "The cached file does not exist for this request. "+
         "Run the tests in store_new mode to grab it."
       super(msg)
     end

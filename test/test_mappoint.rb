@@ -105,16 +105,21 @@ class TestMappoint < Test::Unit::TestCase
     assert_equal -114.88675425368155, br[:northeast][:longitude]
   end
 
-  def test_get_map_with_route
-     mock_soap.for('GetMap').
-      with_xpath('//map:Northeast/map:Latitude/text()' => '35.142',
-                 '//map:Northeast/map:Longitude/text()' => '-116.254').
-      with_xpath('//map:Southwest/map:Latitude/text()' => '33.142',
-                 '//map:Southwest/map:Longitude/text()' => '-118.254').
+  def test_get_simple_route_map
+    Handsoap::Service.logger = File.open('foo.txt','w')
+    mock_soap.for('CalculateSimpleRoute').
+      with_xpath('//map:latLongs/map:LatLong[1]/map:Latitude/text()' => '34.113033',
+                 '//map:latLongs/map:LatLong[1]/map:Longitude/text()' => '-118.268506').
+      with_xpath('//map:latLongs/map:LatLong[2]/map:Latitude/text()' => '34.11861',
+                 '//map:latLongs/map:LatLong[2]/map:Longitude/text()' => '-118.29944')
+    
+    mock_soap.for('GetMap').
       with_xpath('//map:Pushpins/map:Pushpin/map:IconDataSource/text()' =>
                  'Yellowpagesdotcom112881.112881').
-      with_xpath('//map:Options/map:Zoom/text()' => '2')
-
+      with_xpath('//map:Options/map:Zoom/text()' => '2').
+      with_xpath(
+                 '//xmlns:Itinerary/xmlns:Segments/xmlns:Segment[1]/xmlns:Directions/xmlns:Direction[1]/xmlns:Instruction/text()' =>
+                 'Depart Start on Riverside Dr (North-West)')
     image_format = {
       :image_mimetype => 'image/gif',
       :height => 100,
@@ -123,35 +128,32 @@ class TestMappoint < Test::Unit::TestCase
     pushpins = [{
                   :icon_datasource => "Yellowpagesdotcom112881.112881",
                   :icon_name => 'yellowpages',
-                  :latitude => 34.142,
-                  :longitude => -118.254
+                  :latitude => 34.113033,:longitude => -118.268506
                 },
                 {
                   :icon_datasource => "Yellowpagesdotcom112881.112881",
                   :icon_name => 'yellowpages',
-                  :latitude => 34.142,
-                  :longitude => -117.254
+                  :latitude => 34.11861, :longitude => -118.29944
                 }]
-    box = {
-      :northeast => {
-        :latitude => 35.142, :longitude => -116.254
-      },
-      :southwest => {
-        :latitude => 33.142, :longitude => -118.254
-      }
-    }
+
     map_options = {:zoom => 2}
 
-    ret = MapPoint::Render.get_map(image_format,
-                                       box,
-                                       pushpins,
-                                       map_options
-                                   )
-    flunk
+    ret = MapPoint::Render.get_simple_route_map(image_format,
+                                                pushpins,
+                                                map_options
+                                                )
+    assert_equal 530, ret[:total_driving_time]
+    assert_equal 5.36000020056963, ret[:total_distance]
+    assert_not_nil ret[:itinerary]
+
+    dir = ret[:itinerary][-2].last
+    assert_equal 0.11000000685453415, dir[:distance]
+    assert_equal 12, dir[:duration]
+    assert_equal 'BearLeft', dir[:action]
+    assert_equal 'Bear LEFT (South-East) onto Local road(s)', dir[:instruction]
   end
 
   def test_okay_with_calculate_simple_route
-    Handsoap::Service.logger = STDERR
     mock_soap.for('CalculateSimpleRoute').
       with_xpath('//map:latLongs/map:LatLong[1]/map:Latitude/text()' => '34.113033',
                  '//map:latLongs/map:LatLong[1]/map:Longitude/text()' => '-118.268506').
@@ -163,7 +165,7 @@ class TestMappoint < Test::Unit::TestCase
     points = [start, finish]
     parsed_xml = MapPoint::Route.calculate_simple_route_xml(points).native_element
 
-    first_instruction = parsed_xml.xpath('//xmlns:Itinerary/xmlns:Segments/xmlns:Segment[1]/xmlns:Directions/xmlns:Direction[1]/xmlns:Instruction', {'xmlns' => "http://s.mappoint.net/mappoint-30/"})
+    first_instruction = parsed_xml.xpath('//xmlns:Itinerary/xmlns:Segments/xmlns:Segment[1]/xmlns:Directions/xmlns:Direction[1]/xmlns:Instruction', {'xmlns' => "http://s.mappoint.net/mappoint-30/", 'map' => "http://s.mappoint.net/mappoint-30/"})
     assert_equal 'Depart Start on Riverside Dr (North-West)', first_instruction.inner_text
   end
 end

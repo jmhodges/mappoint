@@ -20,8 +20,7 @@ module MapPoint
     end
 
     # FIXME This documentation is really crappily formatted and kinda lacking.
-    # +opts+ can include +:image_format+, +:pushpins+, and
-    # +:bounding_box+. +:pushpins+ is an array of pushpins from their
+    # +:pushpins+ is an array of pushpins from their
     # start to finish. +:image_format+ is the +:height+, and +:width+
     # of the image desired in pixels and the +:image_mimetype+
     # (i.e. 'image/gif', 'image/jpeg', or
@@ -31,9 +30,8 @@ module MapPoint
     # +:icon_datasource+ to find the icon in, and the +:latitude+ and
     # +:longitude+ for the pushpins. +:map_options+ are options for the
     # map specifically, including the +:pan_vertical+,
-    # +:pan_horizontal+, +:zoom+ level, +:render_type+ (which defaults
-    # to 'ReturnUrl') and the +:image_mimetype+ with
-    # the same available options as above.
+    # +:pan_horizontal+, +:zoom+ level, and +:render_type+ (which defaults
+    # to 'ReturnUrl').
     # FIXME a whole host of other options to this endpoint are not implemented.
     def get_map(image_format, bounding_box, pushpins, map_options, parsed_route=nil)
       @response = mp_invoke('GetMap') do |msg|
@@ -41,21 +39,29 @@ module MapPoint
         msg.set_attr 'xmlns:xsd', 'http://www.w3.org/2001/XMLSchema/'
         msg.add 'map:specification' do |spec|
           spec.add 'map:DataSourceName', 'MapPoint.NA'
-          spec.add 'map:Views' do |views|
-            views.add 'map:MapView' do |bybr|
-              bybr.set_attr 'xsi:type', 'map:ViewByBoundingRectangle'
-              add_bounding_rectangle(bybr, bounding_box)
+          if bounding_box
+            spec.add 'map:Views' do |views|
+              views.add 'map:MapView' do |bybr|
+                bybr.set_attr 'xsi:type', 'map:ViewByBoundingRectangle'
+                add_bounding_rectangle(bybr, bounding_box)
+              end
             end
           end
 
           add_map_options(spec, map_options, image_format)
           add_push_pins(spec, pushpins)
-          if parsed_route
-            spec.add 'map:Route', parsed_route, :raw
-          end
+          add_route(spec, parsed_route) if parsed_route
         end
       end
+
       parse_map_result(native_doc)
+    end
+
+    def get_simple_route_map(image_format, pushpins, map_options)
+      route_xml = Route.calculate_simple_route_xml(pushpins)
+      itinerary = parse_itinerary(route_xml)
+      parsed_route = just_route(route_xml)
+      itinerary.merge(get_map(image_format, nil, pushpins, map_options, parsed_route))
     end
 
     private
@@ -123,6 +129,38 @@ module MapPoint
       parse_bounding_rectangle(br)
     end
 
+    def parse_itinerary(xml)
+      return unless x = xml.xpath('//xmlns:Itinerary',ns)[0].native_element
+      {
+        :total_driving_time => parse_driving_time(x),
+        :total_distance => parse_distance(x),
+        :itinerary => parse_segments(x)
+      }
+    end
+
+    def parse_driving_time(x)
+      x.xpath('./xmlns:DrivingTime', ns).inner_text.to_i
+    end
+    def parse_distance(x)
+      x.xpath('./xmlns:Distance', ns).inner_text.to_f
+    end
+
+    def parse_segments(x)
+      x.xpath('./xmlns:Segments/xmlns:Segment', ns).map{|s| parse_directions(s) }
+    end
+
+    def parse_directions(x)
+      x.xpath('./xmlns:Directions/xmlns:Direction', ns).map do |d|
+        {
+          :duration => d.xpath('./xmlns:Duration[1]/text()', ns)[0].to_s.to_i,
+          :distance => d.xpath('./xmlns:Distance[1]/text()', ns)[0].to_s.to_f,
+          :instruction => d.xpath('./xmlns:Instruction', ns).inner_text,
+          :action => d.xpath('./xmlns:Action', ns).inner_text
+        }
+          
+      end
+    end
+                       
     def add_bounding_rectangle(doc, bounding_box)
       doc.add 'map:BoundingRectangle' do |br|
         br.add 'map:Northeast' do |ne|
@@ -169,6 +207,22 @@ module MapPoint
           end
         end
       end
+    end
+
+    def add_route(doc, parsed_route)
+      doc.add 'Route' do |r|
+        r.set_attr 'xmlns', ns['xmlns']
+        parsed_route.children.each do |c|
+          r.add c.name, c.children, :raw
+        end
+      end
+    end
+
+    def just_route(route_xml)
+      elem = route_xml.
+        xpath('//xmlns:CalculateSimpleRouteResult[1]', ns).
+        first.native_element
+      elem
     end
   end
 end
