@@ -18,7 +18,7 @@ module MapPoint
     def parse_address_result(xml)
       res = xml.xpath('//xmlns:FindAddressResult', ns)[0].native_element
       {
-        :num_found => res.xpath('./xmlns:NumberFound', ns).inner_text.to_i,
+        :number_found => res.xpath('./xmlns:NumberFound', ns).inner_text.to_i,
         :results => parse_locations(res.xpath('./xmlns:Results/xmlns:FindResult', ns))
       }
     end

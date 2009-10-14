@@ -174,7 +174,7 @@ class TestMappoint < Test::Unit::TestCase
     mock_soap.for('FindAddress').
       with_xpath('//map:FormattedAddress/text()' => '611 N. Brand Blvd, Glendale, CA')
     resp = MapPoint::Find.find_address('611 N. Brand Blvd, Glendale, CA')
-    assert_equal 1, resp[:num_found]
+    assert_equal 1, resp[:number_found]
     assert_equal 1, resp[:results].size
     first = resp[:results].first
     assert_equal 34.155151, first[:latitude]
@@ -188,7 +188,7 @@ class TestMappoint < Test::Unit::TestCase
     mock_soap.for('FindAddress').
       with_xpath('//map:FormattedAddress/text()' => '611 Brand Blvd, Glendale, CA')
     resp = MapPoint::Find.find_address('611 Brand Blvd, Glendale, CA')
-    assert_equal 2, resp[:num_found]
+    assert_equal 2, resp[:number_found]
     assert_equal 2, resp[:results].size
   end
 end
