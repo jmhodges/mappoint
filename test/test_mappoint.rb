@@ -9,6 +9,8 @@ if ENV['cache_mode'] == 'store_new'
   MockSoap.cache_mode = :store_new
 end
 
+# Handsoap::Service.logger = File.open('foo.txt','w')
+
 MockSoap.cache_dir = File.dirname(__FILE__) + '/data'
 
 class TestMappoint < Test::Unit::TestCase
@@ -106,7 +108,6 @@ class TestMappoint < Test::Unit::TestCase
   end
 
   def test_get_simple_route_map
-    Handsoap::Service.logger = File.open('foo.txt','w')
     mock_soap.for('CalculateSimpleRoute').
       with_xpath('//map:latLongs/map:LatLong[1]/map:Latitude/text()' => '34.113033',
                  '//map:latLongs/map:LatLong[1]/map:Longitude/text()' => '-118.268506').
@@ -167,5 +168,27 @@ class TestMappoint < Test::Unit::TestCase
 
     first_instruction = parsed_xml.xpath('//xmlns:Itinerary/xmlns:Segments/xmlns:Segment[1]/xmlns:Directions/xmlns:Direction[1]/xmlns:Instruction', {'xmlns' => "http://s.mappoint.net/mappoint-30/", 'map' => "http://s.mappoint.net/mappoint-30/"})
     assert_equal 'Depart Start on Riverside Dr (North-West)', first_instruction.inner_text
+  end
+
+  def test_finding_address
+    mock_soap.for('FindAddress').
+      with_xpath('//map:FormattedAddress/text()' => '611 N. Brand Blvd, Glendale, CA')
+    resp = MapPoint::Find.find_address('611 N. Brand Blvd, Glendale, CA')
+    assert_equal 1, resp[:num_found]
+    assert_equal 1, resp[:results].size
+    first = resp[:results].first
+    assert_equal 34.155151, first[:latitude]
+    assert_equal -118.255123, first[:longitude]
+    assert_equal '611 N Brand Blvd', first[:address_line]
+    assert_equal 'Glendale', first[:primary_city]
+    assert_equal 'CA', first[:subdivision]
+    assert_equal '91203-1221', first[:postal_code]
+    assert_equal '611 N Brand Blvd, Glendale, CA 91203-1221', first[:formatted_address]
+    
+    mock_soap.for('FindAddress').
+      with_xpath('//map:FormattedAddress/text()' => '611 Brand Blvd, Glendale, CA')
+    resp = MapPoint::Find.find_address('611 Brand Blvd, Glendale, CA')
+    assert_equal 2, resp[:num_found]
+    assert_equal 2, resp[:results].size
   end
 end
