@@ -184,7 +184,7 @@ class TestMappoint < Test::Unit::TestCase
     assert_equal 'CA', first[:subdivision]
     assert_equal '91203-1221', first[:postal_code]
     assert_equal '611 N Brand Blvd, Glendale, CA 91203-1221', first[:formatted_address]
-    
+    assert_equal 0.95, first[:score]
     mock_soap.for('FindAddress').
       with_xpath('//map:FormattedAddress/text()' => '611 Brand Blvd, Glendale, CA')
     resp = MapPoint::Find.find_address('611 Brand Blvd, Glendale, CA')

@@ -23,9 +23,10 @@ module MapPoint
       }
     end
 
-    def parse_locations(xml)
-      xml.xpath('./xmlns:FoundLocation', ns).map do |fl|
-        parse_location(fl)
+    def parse_locations(find_results)
+      find_results.map do |fr|
+        hsh = {:score => fr.at('Score', ns).inner_text.to_f}
+        hsh.merge(parse_location(fr.at('FoundLocation', ns)))
       end
     end
 
@@ -40,7 +41,7 @@ module MapPoint
         :secondary_city => xml.at('SecondaryCity', ns).inner_text,
         :subdivision => xml.at('Subdivision', ns).inner_text,
         :postal_code => xml.at('PostalCode', ns).inner_text,
-        :formatted_address => xml.at('FormattedAddress', ns).inner_text
+        :formatted_address => xml.at('FormattedAddress', ns).inner_text,
       }
     end
     
