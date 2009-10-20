@@ -12,7 +12,7 @@ Hoe.plugin :git
 Hoe.spec('mappoint') do
   # p.rubyforge_name = 'mappoint' # if different than lowercase project name
   developer('Jeff Hodges', 'jeff@somethingsimilar.com')
-  extra_deps << ['handsoap', '~> 0.5.3']
+  extra_deps << ['handsoap', '~> 1.1.1']
 end
 
 # vim: syntax=Ruby
