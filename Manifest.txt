@@ -6,6 +6,9 @@ deps.rip
 lib/mappoint.rb
 lib/mappoint/common.rb
 lib/mappoint/digest_auth.rb
+lib/mappoint/find.rb
+lib/mappoint/render.rb
+lib/mappoint/route.rb
 lib/mappoint/service.rb
 test/test_mappoint.rb
 test/data/8abd53c57b3fa14732e37af5ea7e61ff
