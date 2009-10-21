@@ -9,7 +9,7 @@ if ENV['cache_mode'] == 'store_new'
   MockSoap.cache_mode = :store_new
 end
 
-Handsoap::Service.logger = File.open('foo.txt','w')
+# Handsoap::Service.logger = File.open('foo.txt','w')
 
 MockSoap.cache_dir = File.dirname(__FILE__) + '/data'
 
