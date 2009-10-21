@@ -2,6 +2,8 @@ module MapPoint
   class Render < Service
     endpoint(:uri => 'http://renderv3.mappoint.net/Render-30/RenderService.asmx?WSDL',
              :version => 1)
+    KM_TO_MILES = 0.621371192
+
     def get_best_bounding_rectangle(latitude, longitude)
       @response = mp_invoke('GetBestMapView') do |msg|
         msg.add 'map:locations' do |many_locs|
@@ -112,7 +114,7 @@ module MapPoint
 
     def parse_by_height_width(view)
       lat = long = nil
-      cp = view.xpath('.//xmlns:ByHeightWidth/xmlns:CenterPoint', ns)
+      cp = view.xpath('./xmlns:ByHeightWidth/xmlns:CenterPoint', ns)
       cp.first.children.each do |c|
         case c.name
         when 'Latitude'
@@ -143,7 +145,7 @@ module MapPoint
       x.xpath('./xmlns:DrivingTime', ns).inner_text.to_i
     end
     def parse_distance(x)
-      x.xpath('./xmlns:Distance', ns).inner_text.to_f
+      x.xpath('./xmlns:Distance', ns).inner_text.to_f * KM_TO_MILES
     end
 
     def parse_segments(x)
@@ -152,9 +154,10 @@ module MapPoint
 
     def parse_directions(x)
       x.xpath('./xmlns:Directions/xmlns:Direction', ns).map do |d|
+        dist = d.xpath('./xmlns:Distance[1]/text()', ns)[0].to_s.to_f * KM_TO_MILES
         {
           :duration => d.xpath('./xmlns:Duration[1]/text()', ns)[0].to_s.to_i,
-          :distance => d.xpath('./xmlns:Distance[1]/text()', ns)[0].to_s.to_f,
+          :distance => dist,
           :instruction => d.xpath('./xmlns:Instruction', ns).inner_text,
           :action => d.xpath('./xmlns:Action', ns).inner_text
         }

@@ -144,11 +144,11 @@ class TestMappoint < Test::Unit::TestCase
                                                 map_options
                                                 )
     assert_equal 530, ret[:total_driving_time]
-    assert_equal 5.36000020056963, ret[:total_distance]
+    assert_in_delta 3.33054971374819, ret[:total_distance], 0.00001
     assert_not_nil ret[:itinerary]
 
     dir = ret[:itinerary][-2].last
-    assert_equal 0.11000000685453415, dir[:distance]
+    assert_in_delta 0.0683508353792101, dir[:distance], 0.00001
     assert_equal 12, dir[:duration]
     assert_equal 'BearLeft', dir[:action]
     assert_equal 'Bear LEFT (South-East) onto Local road(s)', dir[:instruction]
