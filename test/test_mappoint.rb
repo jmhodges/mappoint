@@ -9,7 +9,7 @@ if ENV['cache_mode'] == 'store_new'
   MockSoap.cache_mode = :store_new
 end
 
-# Handsoap::Service.logger = File.open('foo.txt','w')
+Handsoap::Service.logger = File.open('foo.txt','w')
 
 MockSoap.cache_dir = File.dirname(__FILE__) + '/data'
 
@@ -150,6 +150,8 @@ class TestMappoint < Test::Unit::TestCase
     dir = ret[:itinerary][-2].last
     assert_in_delta 0.0683508353792101, dir[:distance], 0.00001
     assert_equal 12, dir[:duration]
+    assert_equal "34.119260553270578", dir[:latitude]
+    assert_equal "-118.30026970244944", dir[:longitude]
     assert_equal 'BearLeft', dir[:action]
     assert_equal 'Bear LEFT (South-East) onto Local road(s)', dir[:instruction]
   end
