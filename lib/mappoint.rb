@@ -12,7 +12,7 @@ require 'mappoint/route'
 require 'mappoint/find'
 
 module MapPoint
-  VERSION = '0.1.0'
+  VERSION = '0.2.0'
   class << self
     attr_accessor :username, :password
   end
