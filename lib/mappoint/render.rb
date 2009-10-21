@@ -158,8 +158,8 @@ module MapPoint
         {
           :duration => d.xpath('./xmlns:Duration[1]/text()', ns)[0].to_s.to_i,
           :distance => dist,
-          :latitude => d.xpath('./xmlns:LatLong/xmlns:Latitude', ns).inner_text,
-          :longitude => d.xpath('./xmlns:LatLong/xmlns:Longitude', ns).inner_text,
+          :latitude => d.xpath('./xmlns:LatLong/xmlns:Latitude', ns).inner_text.to_f,
+          :longitude => d.xpath('./xmlns:LatLong/xmlns:Longitude', ns).inner_text.to_f,
           :instruction => d.xpath('./xmlns:Instruction', ns).inner_text,
           :action => d.xpath('./xmlns:Action', ns).inner_text
         }
