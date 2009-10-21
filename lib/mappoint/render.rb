@@ -2,6 +2,11 @@ module MapPoint
   class Render < Service
     endpoint(:uri => 'http://renderv3.mappoint.net/Render-30/RenderService.asmx?WSDL',
              :version => 1)
+
+    # This constant is only necessary because I spent 2 hours trying
+    # to get the UserInfoRouteHeader/DefaultDistanceUnit working and
+    # failing. I am going to claim that MapPoint blows and for now we
+    # will just do the conversion by hand.
     KM_TO_MILES = 0.621371192
 
     def get_best_bounding_rectangle(latitude, longitude)
