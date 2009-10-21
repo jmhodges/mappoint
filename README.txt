@@ -19,11 +19,7 @@ Talk to MapPoint SOAP API.
 
 == REQUIREMENTS:
 
-* handsoap, specifically the version with HttpError which you can find
-  either at
-  http://github.com/jmhodges/handsoap/tree/temporary_for_awesome
-  (which also lets you use handsoap outside of a gem) or
-  http://github.com/jmhodges/handsoap/tree/improved_error_handling
+* handsoap v1.1.1
 
 == INSTALL:
 
