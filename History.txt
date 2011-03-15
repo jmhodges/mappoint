@@ -1,6 +1,6 @@
-=== 1.0.0 / 2009-09-01
+=== 0.2.1 / 2011-03-15
 
-* 1 major enhancement
+* Bugfixes:
 
-  * Birthday!
+  * Fixed race condition for invalid auth headers
 
