@@ -56,12 +56,11 @@ module MapPoint
       {'xmlns' => "http://s.mappoint.net/mappoint-30/"}
     end
 
-    # FIXME Race condition
     def set_digest_header(http_response)
-      # FIXME we need to make sure this header exists, and throw a new
-      # error if it doesn't.
-      self.class.cached_digest_header =
-        http_response.headers['www-authenticate'][0]
+      auth_header = http_response.headers['www-authenticate'][0]
+      return unless auth_header =~ DigestAuth::VALID_AUTH_HEADER
+
+      self.class.cached_digest_header = auth_header
     end
     
     def digest_auth_header_from_response
