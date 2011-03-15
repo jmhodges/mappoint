@@ -4,14 +4,17 @@ module MapPoint
 
 module DigestAuth
   @@nonce_count = Hash.new(0)
+
   CNONCE = Digest::MD5.hexdigest("%x" % (Time.now.to_i + rand(65535)))
+
+  VALID_AUTH_HEADER = /^(\w+) (.*)/
 
   # FIXME We need to clear out @@nonce_count every once in a
   # great while, but I'm uncertain when the spec allows this.
 
   # FIXME only works for POST
   def self.gen_auth_header(uri, auth_header, user, password, is_IIS = false)
-    auth_header =~ /^(\w+) (.*)/
+    auth_header =~ VALID_AUTH_HEADER
     
     params = {}
     $2.gsub(/(\w+)=("[^"]*"|[^,]*)/) {
